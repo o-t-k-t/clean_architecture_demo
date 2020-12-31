@@ -20,6 +20,7 @@ require (
 	github.com/TechDepa/c_tool/usecase v0.0.0-00010101000000-000000000000
 	github.com/gin-gonic/gin v1.6.3
 	github.com/lib/pq v1.8.0
+	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/sendgrid/rest v2.6.2+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.7.2+incompatible
 	google.golang.org/appengine v1.6.6

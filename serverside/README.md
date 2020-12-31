@@ -1,6 +1,11 @@
+## 使用技術
+- アプリケーション
+  - プログラミング言語: Go 1.11
+  - Webフレームワーク: [Gin](https://github.com/gin-gonic/gin)
+  - ORマッパー: [gorp](https://github.com/go-gorp/gorp)
+  - データベース: PostgreSQL
+  - マイグレーション: [sql-migrate](https://github.com/rubenv/sql-migrate)
 
-
-## migration
 go get github.com/rubenv/sql-migrate/...
 
 

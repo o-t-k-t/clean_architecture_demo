@@ -14,6 +14,7 @@ func NewUsersContorller() UsersContorller {
 
 func (UsersContorller) ShowAll(c *gin.Context) {
 	r := gateways.NewUsersRepository()
+	defer r.Close()
 
 	users, err := usecase.ShowAllUsers(r)
 	if err != nil {
