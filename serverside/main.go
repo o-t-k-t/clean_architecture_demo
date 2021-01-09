@@ -9,12 +9,12 @@ import (
 	"github.com/TechDepa/c_tool/adapters/controllers"
 )
 
-type User struct {
+type AdminUser struct {
 	Id int `db:"id"`
 }
 
 func main() {
-	uc := controllers.NewUsersContorller()
+	uc := controllers.NewAdminUsersContorller()
 
 	r := gin.Default()
 	r.GET("/users", uc.ShowAll)
