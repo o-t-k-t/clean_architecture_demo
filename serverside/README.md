@@ -17,9 +17,17 @@ docker-compose up
 dev_appserver.py app.yml
 ```
 
-### マイグレーション実行
+### テスト
+
+```
+docker-compose -f docker-compose.yml -f docker-compose-test.yml up -d
+sql-migrate up -env=test
+go test
 ```
 
+### マイグレーション実行
+```
+sql-migrate up
 ```
 
 #### 状態確認

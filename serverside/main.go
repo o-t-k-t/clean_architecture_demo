@@ -1,27 +1,26 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	"github.com/pkg/errors"
 
 	"github.com/TechDepa/c_tool/adapters/controllers"
 )
 
-type AdminUser struct {
-	Id int `db:"id"`
-}
-
-func main() {
+func setupRouter() *gin.Engine {
 	uc := controllers.NewAdminUsersContorller()
 
 	r := gin.Default()
 	r.GET("/users", uc.ShowAll)
+	r.POST("/users", uc.Create)
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	return r
 }
 
-func ping(gc *gin.Context) {
-	fmt.Println("pong!")
+func main() {
+	err := setupRouter().Run()
+	log.Fatal(errors.WithMessagef(err, "ルーティングが終了した"))
 }

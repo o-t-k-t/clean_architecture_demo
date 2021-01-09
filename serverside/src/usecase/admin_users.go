@@ -19,11 +19,11 @@ func ShowAllAdminUsers(r AdminUsersRepository) (model.UserList, error) {
 	return ul, nil
 }
 
-func CreateUser(u model.AdminUser, r AdminUsersRepository) error {
+func CreateUser(u model.AdminUser, r AdminUsersRepository) (model.AdminUser, error) {
 	err := r.Create(u)
 	if err != nil {
-		return errors.WithStack(err)
+		return u, errors.WithStack(err)
 	}
 
-	return nil
+	return u, nil
 }

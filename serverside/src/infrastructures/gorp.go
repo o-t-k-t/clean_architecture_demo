@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/TechDepa/c_tool/adapters/gateways"
+	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/pkg/errors"
 	"gopkg.in/gorp.v1"
 )
@@ -22,7 +24,7 @@ type Transaction struct {
 func WithDatabase(
 	f func(Dababase) error,
 ) error {
-	db := newDbMap()
+	db := NewDbMap()
 	defer db.Db.Close()
 
 	return f(Dababase{db})
@@ -32,7 +34,7 @@ func WithDatabase(
 func WithDatabaseAndTransaction(
 	f func(Dababase, Transaction) error,
 ) error {
-	db := newDbMap()
+	db := NewDbMap()
 	defer db.Db.Close()
 
 	tx, err := db.Begin()
@@ -54,12 +56,33 @@ func WithDatabaseAndTransaction(
 	return err
 }
 
-// newDbMap DB接続を開始
-func newDbMap() *gorp.DbMap {
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+// NewDbMap DB接続を開始
+func NewDbMap() *gorp.DbMap {
+	db, err := sql.Open("postgres", DBDataSource())
 	if err != nil {
 		log.Panicf("SQL接続失敗 %s", errors.WithStack(err))
 	}
 
-	return &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
+	dbmap.AddTableWithName(model.BaseUser{}, "base_users").SetKeys(true, "Id")
+	dbmap.AddTableWithName(gateways.AdminUserRecord{}, "admin_users").SetKeys(true, "Id")
+	dbmap.AddTableWithName(model.AdminUser{}, "admin_users").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Companie{}, "companies").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Office{}, "offices").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.User{}, "users").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.PartnerCompany{}, "partner_companies").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Personnel{}, "personnel").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Term{}, "terms").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ExceptTerm{}, "except_terms").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ImageList{}, "image_lists").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Image{}, "images").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ConstructionSiteSubscription{}, "construction_site_subscriptions").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ConstructionSite{}, "construction_sites").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.UserConstructionSite{}, "user_construction_sites").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ConstructionSiteSubscription{}, "construction_site_subscriptions").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.ConstructionSiteSubscription{}, "construction_site_subscriptions").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.Construction{}, "constructions").SetKeys(true, "Id")
+	// dbmap.AddTableWithName(model.SubConstruction{}, "sub_constructions").SetKeys(true, "Id")
+
+	return dbmap
 }
