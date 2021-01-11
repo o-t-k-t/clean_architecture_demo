@@ -1,0 +1,6 @@
+{
+  "email": "{{ .Email }}",
+  "name": "{{ .Name }}",
+  "password": "{{ .Password }}",
+  "passwordConfirm": "{{ .PasswordConfirm }}"
+}

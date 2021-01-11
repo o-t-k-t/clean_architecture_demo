@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"github.com/TechDepa/c_tool/adapters/gateways"
-	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/TechDepa/c_tool/infrastructures"
 	"github.com/TechDepa/c_tool/usecase"
 	"github.com/gin-gonic/gin"
@@ -32,8 +31,9 @@ func (AdminUsersContorller) ShowAll(c *gin.Context) {
 }
 
 func (AdminUsersContorller) Create(c *gin.Context) {
-	var u model.AdminUser
+	var u usecase.CreateUserInput
 	if err := c.BindJSON(&u); err != nil {
+		c.AbortWithError(415, err)
 		return
 	}
 
@@ -42,10 +42,14 @@ func (AdminUsersContorller) Create(c *gin.Context) {
 			r := gateways.NewAdminUsersRepository(db, tx)
 
 			u, err := usecase.CreateUser(u, r)
-			if err != nil {
+			if err == usecase.InvalidAdminUserError {
+				c.AbortWithError(400, err)
+				return errors.WithStack(err)
+			} else if err != nil {
 				c.AbortWithError(500, err)
 				return errors.WithStack(err)
 			}
+
 			c.JSON(200, u)
 			return nil
 		},

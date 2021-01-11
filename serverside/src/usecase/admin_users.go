@@ -19,11 +19,45 @@ func ShowAllAdminUsers(r AdminUsersRepository) (model.AdminUserList, error) {
 	return ul, nil
 }
 
-func CreateUser(u model.AdminUser, r AdminUsersRepository) (model.AdminUser, error) {
-	err := r.Create(u)
-	if err != nil {
-		return u, errors.WithStack(err)
+type CreateUserInput struct {
+	AdminUser       model.AdminUser
+	Password        model.Password `json:"password"`
+	PasswordConfirm model.Password `json:"passwordConfirm"`
+}
+
+func (in CreateUserInput) Valid() bool {
+	if in.Password != in.PasswordConfirm {
+		return false
 	}
 
-	return u, nil
+	if !in.Password.Valid() {
+		return false
+	}
+
+	if !in.PasswordConfirm.Valid() {
+		return false
+	}
+	return true
+}
+
+var InvalidAdminUserError = errors.New("管理ユーザー入力データ不正")
+
+func CreateUser(in CreateUserInput, r AdminUsersRepository) (model.AdminUser, error) {
+	if !in.Valid() {
+		return model.AdminUser{}, InvalidAdminUserError
+	}
+
+	au := in.AdminUser
+	hash, err := in.Password.NewPasswordHash()
+	if err != nil {
+		return au, errors.WithStack(err)
+	}
+	au.PasswordHash = hash
+
+	err = r.Create(au)
+	if err != nil {
+		return au, errors.WithStack(err)
+	}
+
+	return au, nil
 }

@@ -18,6 +18,8 @@ require (
 	github.com/TechDepa/c_tool/domain/model v0.0.0-00010101000000-000000000000
 	github.com/TechDepa/c_tool/infrastructures v0.0.0-00010101000000-000000000000
 	github.com/TechDepa/c_tool/usecase v0.0.0-00010101000000-000000000000
+	github.com/appleboy/gin-jwt v2.5.0+incompatible
+	github.com/appleboy/gin-jwt/v2 v2.6.4
 	github.com/gin-gonic/gin v1.6.3
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
@@ -26,7 +28,8 @@ require (
 	github.com/sendgrid/rest v2.6.2+incompatible // indirect
 	github.com/sendgrid/sendgrid-go v3.7.2+incompatible
 	github.com/sergi/go-diff v1.1.0 // indirect
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.5.1
 	google.golang.org/appengine v1.6.6
+	gopkg.in/dgrijalva/jwt-go.v3 v3.2.0 // indirect
 	gopkg.in/gorp.v1 v1.7.2
 )
