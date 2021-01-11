@@ -25,7 +25,7 @@ func NewAdminUsersRepository(database database, transaction transaction) AdminUs
 	}
 }
 
-func (r AdminUsersRepository) FindAll() (model.UserList, error) {
+func (r AdminUsersRepository) FindAll() (model.AdminUserList, error) {
 	q := `
 	select
       admin_users.id,
@@ -44,7 +44,7 @@ func (r AdminUsersRepository) FindAll() (model.UserList, error) {
 		return nil, errors.WithMessagef(err, "admin_users取得失敗")
 	}
 
-	return model.UserList(users), nil
+	return model.AdminUserList(users), nil
 }
 
 func (r AdminUsersRepository) Create(au model.AdminUser) error {

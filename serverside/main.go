@@ -14,8 +14,8 @@ func setupRouter() *gin.Engine {
 	uc := controllers.NewAdminUsersContorller()
 
 	r := gin.Default()
-	r.GET("/users", uc.ShowAll)
-	r.POST("/users", uc.Create)
+	r.GET("/v1/admin/users", uc.ShowAll)
+	r.POST("/v1/admin/users", uc.Create)
 
 	return r
 }

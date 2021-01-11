@@ -6,11 +6,11 @@ import (
 )
 
 type AdminUsersRepository interface {
-	FindAll() (model.UserList, error)
+	FindAll() (model.AdminUserList, error)
 	Create(u model.AdminUser) error
 }
 
-func ShowAllAdminUsers(r AdminUsersRepository) (model.UserList, error) {
+func ShowAllAdminUsers(r AdminUsersRepository) (model.AdminUserList, error) {
 	ul, err := r.FindAll()
 	if err != nil {
 		return nil, errors.WithStack(err)
