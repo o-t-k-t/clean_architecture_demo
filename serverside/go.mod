@@ -31,5 +31,6 @@ require (
 	github.com/stretchr/testify v1.5.1
 	google.golang.org/appengine v1.6.6
 	gopkg.in/dgrijalva/jwt-go.v3 v3.2.0 // indirect
+	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 	gopkg.in/gorp.v1 v1.7.2
 )

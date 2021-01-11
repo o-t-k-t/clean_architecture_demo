@@ -71,8 +71,8 @@ func TestMain(t *testing.T) {
 			{"パスワード長0文字で400応答", "jima@hotmail.com", "廣川 舞", "", "", 400, 0},
 			{"パスワード長5文字で400応答", "jima@hotmail.com", "廣川 舞", "a1a2a", "a1a2a", 400, 0},
 			{"パスワード長6文字で200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3", "a1a2a3", 200, 1},
-			{"パスワード長23文字で200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a1a2a3a1a2a3a1a2a", "a1a2a3a1a2a3a1a2a3a1a2a", 200, 1},
-			{"パスワード長24文字で200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a1a2a3a1a2a3a1a2a3", "a1a2a3a1a2a3a1a2a3a1a2a3", 400, 0},
+			{"パスワード長24文字で200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a1a2a3a1a2a3a1a2a3", "a1a2a3a1a2a3a1a2a3a1a2a3", 200, 1},
+			{"パスワード長25文字で200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a1a2a3a1a2a3a1a2a3a", "a1a2a3a1a2a3a1a2a3a1a2a3a", 400, 0},
 		}
 		for _, c := range cases {
 			t.Run(c.TestName, func(t *testing.T) {

@@ -7,14 +7,6 @@ import (
 
 type Password string
 
-func (v Password) Valid() bool {
-	if len(v) < 6 || 24 <= len(v) {
-		return false
-	} else {
-		return true
-	}
-}
-
 func (v Password) NewPasswordHash() (PasswordHash, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(v), 10)
 	if err != nil {
@@ -34,6 +26,7 @@ func (v Password) MatchesPasswordHash(hash PasswordHash) error {
 }
 
 type PasswordHash string
+
 type BaseUser struct {
 	Base
 	Email        string       `db:"email" json:"email"`
