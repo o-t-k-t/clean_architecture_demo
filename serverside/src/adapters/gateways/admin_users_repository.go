@@ -7,9 +7,8 @@ import (
 )
 
 type AdminUsersRepository struct {
-	db    database
-	tx    transaction
-	timer timer
+	db database
+	tx transaction
 }
 
 type AdminUserRecord struct {
@@ -19,11 +18,10 @@ type AdminUserRecord struct {
 }
 
 // NewAdminUsersRepository AdminUsersRepositoryインスタンスを作成
-func NewAdminUsersRepository(database database, transaction transaction, timer timer) AdminUsersRepository {
+func NewAdminUsersRepository(database database, transaction transaction) AdminUsersRepository {
 	return AdminUsersRepository{
-		db:    database,
-		tx:    transaction,
-		timer: timer,
+		db: database,
+		tx: transaction,
 	}
 }
 

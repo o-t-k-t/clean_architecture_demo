@@ -6,8 +6,12 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/TechDepa/c_tool/adapters/gateways"
+	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/TechDepa/c_tool/infrastructures"
+	"github.com/sebdah/goldie/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,14 +21,38 @@ func TestMain(t *testing.T) {
 	router := setupRouter()
 	w := httptest.NewRecorder()
 
-	t.Run("GET /users", func(t *testing.T) {
+	// テスト用に現在時刻を固定 2021-11-02 09:57:19
+	model.OverrapNowTime(2021, time.Month(11), 2, 19, 57, 19, 100)
+
+	t.Run("GET users returns 1 user when there is one user", func(t *testing.T) {
+		// フィクスチャーデータ
+		infrastructures.WithDatabaseAndTransaction(
+			func(db infrastructures.Dababase, tx infrastructures.Transaction) error {
+				r := gateways.NewAdminUsersRepository(db, tx)
+				r.Create(model.AdminUser{BaseUser: model.BaseUser{
+					Email: "katiesanchez@henry.info",
+					Name:  "宇野 太郎",
+				}})
+				return nil
+			},
+		)
+		t.Cleanup(func() { truncateTables("admin_users", "base_users") })
+
 		// 実行
 		req, _ := http.NewRequest(http.MethodGet, "/users", nil)
 		router.ServeHTTP(w, req)
 
 		// チェック
 		assert.Equal(t, 200, w.Code)
-		assert.Equal(t, "[]", w.Body.String())
+
+		g := goldie.New(
+			t,
+			goldie.WithFixtureDir("testdata/golden_fixtures"),
+			goldie.WithNameSuffix(".golden.json"),
+			goldie.WithTestNameForDir(true),
+			goldie.WithSubTestNameForDir(true),
+		)
+		g.Assert(t, "get_users", w.Body.Bytes())
 	})
 
 	t.Run("POST /users", func(t *testing.T) {
@@ -52,7 +80,7 @@ func truncateTables(tableNames ...string) {
 	defer dbMap.Db.Close()
 
 	for _, tn := range tableNames {
-		_, err := dbMap.Exec("truncate table " + tn + " cascade")
+		_, err := dbMap.Exec("truncate table " + tn + " restart identity cascade")
 		if err != nil {
 			log.Fatalf("テーブル消去失敗: %s", err.Error())
 		}

@@ -18,11 +18,7 @@ func NewAdminUsersContorller() AdminUsersContorller {
 func (AdminUsersContorller) ShowAll(c *gin.Context) {
 	infrastructures.WithDatabase(
 		func(db infrastructures.Dababase) error {
-			r := gateways.NewAdminUsersRepository(
-				db,
-				nil,
-				infrastructures.NewTimer(),
-			)
+			r := gateways.NewAdminUsersRepository(db, nil)
 
 			users, err := usecase.ShowAllAdminUsers(r)
 			if err != nil {
@@ -43,11 +39,7 @@ func (AdminUsersContorller) Create(c *gin.Context) {
 
 	infrastructures.WithDatabaseAndTransaction(
 		func(db infrastructures.Dababase, tx infrastructures.Transaction) error {
-			r := gateways.NewAdminUsersRepository(
-				db,
-				tx,
-				infrastructures.NewTimer(),
-			)
+			r := gateways.NewAdminUsersRepository(db, tx)
 
 			u, err := usecase.CreateUser(u, r)
 			if err != nil {
