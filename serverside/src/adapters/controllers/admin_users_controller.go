@@ -19,12 +19,12 @@ func (AdminUsersContorller) ShowAll(c *gin.Context) {
 		func(db infrastructures.Dababase) error {
 			r := gateways.NewAdminUsersRepository(db, nil)
 
-			users, err := usecase.ShowAllAdminUsers(r)
+			sc, users, err := usecase.ShowAllAdminUsers(r)
 			if err != nil {
-				c.AbortWithError(500, err)
+				c.AbortWithError(sc.Code(), err)
 				return errors.WithStack(err)
 			}
-			c.JSON(200, users)
+			c.JSON(sc.Code(), users)
 			return nil
 		},
 	)
@@ -41,13 +41,13 @@ func (AdminUsersContorller) Create(c *gin.Context) {
 		func(db infrastructures.Dababase, tx infrastructures.Transaction) error {
 			r := gateways.NewAdminUsersRepository(db, tx)
 
-			u, err := usecase.CreateUser(u, r)
+			sc, u, err := usecase.CreateUser(u, r)
 			if err != nil {
-				c.AbortWithError(500, err)
+				c.AbortWithError(sc.Code(), err)
 				return errors.WithStack(err)
 			}
 
-			c.JSON(200, u)
+			c.JSON(sc.Code(), u)
 			return nil
 		},
 	)

@@ -11,13 +11,13 @@ type AdminUsersRepository interface {
 	Create(u model.AdminUser) error
 }
 
-func ShowAllAdminUsers(r AdminUsersRepository) (model.AdminUserList, error) {
+func ShowAllAdminUsers(r AdminUsersRepository) (Status, model.AdminUserList, error) {
 	ul, err := r.FindAll()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return 500, nil, errors.WithStack(err)
 	}
 
-	return ul, nil
+	return 500, ul, nil
 }
 
 type CreateUserInput struct {
@@ -39,22 +39,22 @@ func (in CreateUserInput) Validate() error {
 	return nil
 }
 
-func CreateUser(in CreateUserInput, r AdminUsersRepository) (model.AdminUser, error) {
+func CreateUser(in CreateUserInput, r AdminUsersRepository) (Status, model.AdminUser, error) {
 	if err := in.Validate(); err != nil {
-		return model.AdminUser{}, errors.WithStack(err)
+		return 400, model.AdminUser{}, errors.WithStack(err)
 	}
 
 	au := in.AdminUser
 	hash, err := in.Password.NewPasswordHash()
 	if err != nil {
-		return au, errors.WithStack(err)
+		return 400, au, errors.WithStack(err)
 	}
 	au.PasswordHash = hash
 
 	err = r.Create(au)
 	if err != nil {
-		return au, errors.WithStack(err)
+		return 500, au, errors.WithStack(err)
 	}
 
-	return au, nil
+	return 200, au, nil
 }
