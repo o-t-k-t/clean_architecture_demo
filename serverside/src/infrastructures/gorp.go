@@ -43,8 +43,7 @@ func WithDatabaseAndTransaction(
 	}
 
 	if err := f(Dababase{db}, Transaction{tx}); err != nil {
-		e := tx.Rollback()
-		if err != nil {
+		if e := tx.Rollback(); e != nil {
 			log.Printf("データベースロールバック失敗 %s %s", err, e)
 		}
 		return err
