@@ -42,10 +42,7 @@ func (AdminUsersContorller) Create(c *gin.Context) {
 			r := gateways.NewAdminUsersRepository(db, tx)
 
 			u, err := usecase.CreateUser(u, r)
-			if err == usecase.InvalidAdminUserError {
-				c.AbortWithError(400, err)
-				return errors.WithStack(err)
-			} else if err != nil {
+			if err != nil {
 				c.AbortWithError(500, err)
 				return errors.WithStack(err)
 			}

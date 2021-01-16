@@ -3,6 +3,7 @@ package usecase
 import (
 	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/pkg/errors"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type AdminUsersRepository interface {
@@ -21,30 +22,26 @@ func ShowAllAdminUsers(r AdminUsersRepository) (model.AdminUserList, error) {
 
 type CreateUserInput struct {
 	AdminUser       model.AdminUser
-	Password        model.Password `json:"password"`
-	PasswordConfirm model.Password `json:"passwordConfirm"`
+	Password        model.Password `json:"password" validate:"required,min=6,max=24"`
+	PasswordConfirm model.Password `json:"passwordConfirm" validate:"required,min=6,max=24"`
 }
 
-func (in CreateUserInput) Valid() bool {
+func (in CreateUserInput) Validate() error {
+	err := validator.New().Struct(in)
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
 	if in.Password != in.PasswordConfirm {
-		return false
+		return errors.New("確認パスワード不一致")
 	}
 
-	if !in.Password.Valid() {
-		return false
-	}
-
-	if !in.PasswordConfirm.Valid() {
-		return false
-	}
-	return true
+	return nil
 }
-
-var InvalidAdminUserError = errors.New("管理ユーザー入力データ不正")
 
 func CreateUser(in CreateUserInput, r AdminUsersRepository) (model.AdminUser, error) {
-	if !in.Valid() {
-		return model.AdminUser{}, InvalidAdminUserError
+	if err := in.Validate(); err != nil {
+		return model.AdminUser{}, errors.WithStack(err)
 	}
 
 	au := in.AdminUser
