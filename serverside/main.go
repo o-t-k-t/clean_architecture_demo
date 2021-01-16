@@ -12,7 +12,9 @@ import (
 )
 
 func setupRouter() *gin.Engine {
-	uc := controllers.NewAdminUsersController()
+	db := infrastructures.NewDatabasePointer()
+
+	uc := controllers.NewAdminUsersController(db)
 
 	r := gin.Default()
 	r.GET("/v1/admin/users", func(c *gin.Context) {

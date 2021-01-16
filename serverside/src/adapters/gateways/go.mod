@@ -6,6 +6,8 @@ replace github.com/TechDepa/c_tool/usecase => ../../usecase
 
 replace github.com/TechDepa/c_tool/infrastructures => ../../infrastructures
 
+replace github.com/TechDepa/c_tool/adapters" => ../
+
 replace github.com/TechDepa/c_tool/domain/model => ../../domain/model
 
 require (

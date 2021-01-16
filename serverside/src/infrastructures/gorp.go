@@ -10,9 +10,16 @@ import (
 	"gopkg.in/gorp.v1"
 )
 
-// Dababase DB接続情報を保持
-type Dababase struct {
-	*gorp.DbMap
+// Database DB接続情報を保持
+type Database struct {
+	dbMap       *gorp.DbMap
+	transaction *gorp.Transaction
+}
+
+var database = Database{}
+
+func NewDatabasePointer() *Database {
+	return &database
 }
 
 // Transaction トランサクション情報
@@ -20,39 +27,72 @@ type Transaction struct {
 	*gorp.Transaction
 }
 
-// WithDatabase 引数の処理を前後にデータベースコネションの確立と開放を行って実行する
-func WithDatabase(
-	f func(Dababase) error,
-) error {
-	db := NewDbMap()
-	defer db.Db.Close()
-
-	return f(Dababase{db})
+// BeginConnection
+func (db Database) BeginConnection() {
+	db.dbMap = NewDbMap()
 }
 
-// WithDatabaseAndTransaction 引数の処理を前後にデータベースコネションの確立と開放、トランザクションの開始と完了を行って実行する
-func WithDatabaseAndTransaction(
-	f func(Dababase, Transaction) error,
-) error {
-	db := NewDbMap()
-	defer db.Db.Close()
+// BeginConnectionAndTransaction 引数の処理を前後にデータベースコネションの確立と開放、トランザクションの開始と完了を行って実行する
+func (db *Database) BeginConnectionAndTransaction() error {
+	db.dbMap = NewDbMap()
 
-	tx, err := db.Begin()
+	tx, err := db.dbMap.Begin()
 	if err != nil {
 		return errors.WithMessagef(err, "トランザクション開始失敗")
 	}
+	db.transaction = tx
 
-	if err := f(Dababase{db}, Transaction{tx}); err != nil {
-		if e := tx.Rollback(); e != nil {
-			log.Printf("データベースロールバック失敗 %s %s", err, e)
+	return nil
+}
+
+// Select
+func (db Database) Select(i interface{}, query string, args ...interface{}) ([]interface{}, error) {
+	return db.dbMap.Select(i, query, args...)
+}
+
+// Insert
+func (db Database) Insert(list ...interface{}) error {
+	if tx := db.transaction; tx != nil {
+		return tx.Insert(list...)
+	}
+
+	return db.dbMap.Insert(list...)
+}
+
+// CloseAndCommitOrRollback
+func (db *Database) CommitAndClose() {
+	db.CommitOrRollbackAndClose(true)
+}
+
+// CommitAndRollback
+func (db *Database) CommitAndRollback() {
+	db.CommitOrRollbackAndClose(false)
+}
+
+// CloseAndCommitOrRollback
+func (db *Database) CommitOrRollbackAndClose(commit bool) {
+	if tx := db.transaction; tx != nil {
+		if commit {
+			if err := tx.Commit(); err != nil {
+				log.Fatalf("データベースコミット失敗 %s", err.Error())
+			}
+		} else {
+			if err := tx.Rollback(); err != nil {
+				log.Fatalf("データベースロールバック失敗 %s", err.Error())
+			}
 		}
-		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return errors.WithMessagef(err, "トランザクションコミット失敗")
+	if db.dbMap != nil {
+		db.dbMap.Db.Close()
 	}
-	return err
+}
+
+// Close
+func (db *Database) Close() {
+	if db.dbMap != nil {
+		db.dbMap.Db.Close()
+	}
 }
 
 // NewDbMap DB接続を開始

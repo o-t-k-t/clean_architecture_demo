@@ -10,7 +10,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/TechDepa/c_tool/adapters/gateways"
 	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/TechDepa/c_tool/infrastructures"
 	"github.com/stretchr/testify/assert"
@@ -100,17 +99,14 @@ func TestMain(t *testing.T) {
 				// チェック
 				assert.Equal(t, c.ExpectedStatus, w.Code)
 
-				infrastructures.WithDatabase(
-					func(db infrastructures.Dababase) error {
-						r := gateways.NewAdminUsersRepository(db, nil)
-						_, err := r.FindAll()
-						if err != nil {
-							log.Fatal(err)
-						}
-						// assert.Equal(t, c.ExpectedUsers, len(u))
-						return nil
-					},
-				)
+				// db := infrastructures.NewDatabasePointerInstance()
+				// db.BeginConnection()
+
+				// _, err = gateways.NewAdminUsersRepository(db).FindAll()
+				// if err != nil {
+				// 	log.Fatal(err)
+				// }
+				// assert.Equal(t, c.ExpectedUsers, len(u))
 			})
 		}
 	})

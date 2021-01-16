@@ -7,8 +7,7 @@ import (
 )
 
 type AdminUsersRepository struct {
-	db database
-	tx transaction
+	db Database
 }
 
 type AdminUserRecord struct {
@@ -18,11 +17,8 @@ type AdminUserRecord struct {
 }
 
 // NewAdminUsersRepository AdminUsersRepositoryインスタンスを作成
-func NewAdminUsersRepository(database database, transaction transaction) AdminUsersRepository {
-	return AdminUsersRepository{
-		db: database,
-		tx: transaction,
-	}
+func NewAdminUsersRepository(database Database) AdminUsersRepository {
+	return AdminUsersRepository{db: database}
 }
 
 func (r AdminUsersRepository) FindAll() (model.AdminUserList, error) {
@@ -49,12 +45,12 @@ func (r AdminUsersRepository) FindAll() (model.AdminUserList, error) {
 
 func (r AdminUsersRepository) Create(au model.AdminUser) error {
 	bu := au.BaseUser
-	if err := r.tx.Insert(&bu); err != nil {
+	if err := r.db.Insert(&bu); err != nil {
 		return errors.WithMessagef(err, "base_users登録失敗")
 	}
 
 	aur := AdminUserRecord{BaseUserId: bu.Id}
-	if err := r.tx.Insert(&aur); err != nil {
+	if err := r.db.Insert(&aur); err != nil {
 		return errors.WithMessagef(err, "admin_users登録失敗")
 	}
 

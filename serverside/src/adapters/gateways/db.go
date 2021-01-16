@@ -2,12 +2,12 @@ package gateways
 
 import "github.com/TechDepa/c_tool/domain/model"
 
-type database interface {
+type Database interface {
+	BeginConnection()
+	BeginConnectionAndTransaction() error
+	CommitOrRollbackAndClose(commit bool)
+	Close()
 	Select(i interface{}, query string, args ...interface{}) ([]interface{}, error)
-}
-
-type transaction interface {
-	Commit() error
 	Insert(list ...interface{}) error
 }
 

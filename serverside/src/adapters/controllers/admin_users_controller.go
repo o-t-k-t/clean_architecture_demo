@@ -2,60 +2,72 @@ package controllers
 
 import (
 	"github.com/TechDepa/c_tool/adapters/gateways"
-	"github.com/TechDepa/c_tool/infrastructures"
 	"github.com/TechDepa/c_tool/usecase"
 	"github.com/pkg/errors"
 )
 
-type AdminUsersContorller struct{}
-
-func NewAdminUsersController() AdminUsersContorller {
-	return AdminUsersContorller{}
+type database interface {
+	BeginConnection()
+	BeginConnectionAndTransaction() error
+	Close(commit bool) error
 }
 
-func (AdminUsersContorller) ShowAll(c Request) {
-	infrastructures.WithDatabase(
-		func(db infrastructures.Dababase) error {
-			r := gateways.NewAdminUsersRepository(db, nil)
-
-			sc, users, err := usecase.ShowAllAdminUsers(r)
-			if err != nil {
-				c.RenderAbortWithError(sc, err)
-				return errors.WithStack(err)
-			}
-			c.RenderJSON(sc, users)
-			return nil
-		},
-	)
+type AdminUsersController struct {
+	db gateways.Database
 }
 
-func (AdminUsersContorller) Create(c Request) {
-	var u usecase.CreateUserInput
-	if err := c.BindJSON(&u); err != nil {
-		c.RenderAbortWithError(415, err)
+func NewAdminUsersController(db gateways.Database) AdminUsersController {
+	return AdminUsersController{db}
+}
+
+func (c AdminUsersController) ShowAll(req Request) {
+	c.db.BeginConnection()
+	defer c.db.Close()
+
+	r := gateways.NewAdminUsersRepository(c.db)
+
+	sc, users, err := usecase.ShowAllAdminUsers(r)
+	if err != nil {
+		req.RenderAbortWithError(sc, err)
 		return
 	}
 
-	infrastructures.WithDatabaseAndTransaction(
-		func(db infrastructures.Dababase, tx infrastructures.Transaction) error {
-			r := gateways.NewAdminUsersRepository(db, tx)
-
-			sc, u, err := usecase.CreateUser(u, r)
-			if err != nil {
-				c.RenderAbortWithError(sc, err)
-				return errors.WithStack(err)
-			}
-
-			c.RenderJSON(sc, u)
-			return nil
-		},
-	)
+	req.RenderJSON(sc, users)
+	return
 }
 
-func (AdminUsersContorller) Update() {
+func (c AdminUsersController) Create(req Request) {
+	var in usecase.CreateUserInput
+	if err := req.BindJSON(&in); err != nil {
+		req.RenderAbortWithError(415, errors.WithStack(err))
+		return
+	}
+
+	r := gateways.NewAdminUsersRepository(c.db)
+
+	commit := false
+	if err := c.db.BeginConnectionAndTransaction(); err != nil {
+		req.RenderAbortWithError(500, errors.WithStack(err))
+		return
+	}
+	defer c.db.CommitOrRollbackAndClose(commit)
+
+	sc, u, err := usecase.CreateUser(in, r)
+	if err != nil {
+		req.RenderAbortWithError(sc, err)
+		return
+	}
+
+	req.RenderJSON(sc, u)
+	commit = true
+
+	return
+}
+
+func (AdminUsersController) Update() {
 
 }
 
-func (AdminUsersContorller) Delete() {
+func (AdminUsersController) Delete() {
 
 }
