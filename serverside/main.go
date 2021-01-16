@@ -8,14 +8,19 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/TechDepa/c_tool/adapters/controllers"
+	"github.com/TechDepa/c_tool/infrastructures"
 )
 
 func setupRouter() *gin.Engine {
-	uc := controllers.NewAdminUsersContorller()
+	uc := controllers.NewAdminUsersController()
 
 	r := gin.Default()
-	r.GET("/v1/admin/users", uc.ShowAll)
-	r.POST("/v1/admin/users", uc.Create)
+	r.GET("/v1/admin/users", func(c *gin.Context) {
+		uc.ShowAll(infrastructures.Request{c})
+	})
+	r.POST("/v1/admin/users", func(c *gin.Context) {
+		uc.Create(infrastructures.Request{c})
+	})
 
 	return r
 }

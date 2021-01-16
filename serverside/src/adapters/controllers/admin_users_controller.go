@@ -4,36 +4,35 @@ import (
 	"github.com/TechDepa/c_tool/adapters/gateways"
 	"github.com/TechDepa/c_tool/infrastructures"
 	"github.com/TechDepa/c_tool/usecase"
-	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
 
 type AdminUsersContorller struct{}
 
-func NewAdminUsersContorller() AdminUsersContorller {
+func NewAdminUsersController() AdminUsersContorller {
 	return AdminUsersContorller{}
 }
 
-func (AdminUsersContorller) ShowAll(c *gin.Context) {
+func (AdminUsersContorller) ShowAll(c Request) {
 	infrastructures.WithDatabase(
 		func(db infrastructures.Dababase) error {
 			r := gateways.NewAdminUsersRepository(db, nil)
 
 			sc, users, err := usecase.ShowAllAdminUsers(r)
 			if err != nil {
-				c.AbortWithError(sc.Code(), err)
+				c.RenderAbortWithError(sc, err)
 				return errors.WithStack(err)
 			}
-			c.JSON(sc.Code(), users)
+			c.RenderJSON(sc, users)
 			return nil
 		},
 	)
 }
 
-func (AdminUsersContorller) Create(c *gin.Context) {
+func (AdminUsersContorller) Create(c Request) {
 	var u usecase.CreateUserInput
 	if err := c.BindJSON(&u); err != nil {
-		c.AbortWithError(415, err)
+		c.RenderAbortWithError(415, err)
 		return
 	}
 
@@ -43,11 +42,11 @@ func (AdminUsersContorller) Create(c *gin.Context) {
 
 			sc, u, err := usecase.CreateUser(u, r)
 			if err != nil {
-				c.AbortWithError(sc.Code(), err)
+				c.RenderAbortWithError(sc, err)
 				return errors.WithStack(err)
 			}
 
-			c.JSON(sc.Code(), u)
+			c.RenderJSON(sc, u)
 			return nil
 		},
 	)
