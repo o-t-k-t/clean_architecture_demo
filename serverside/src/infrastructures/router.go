@@ -5,9 +5,26 @@ import (
 	"log"
 	"time"
 
+	"github.com/TechDepa/c_tool/adapters/controllers"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
+
+func SetupRouter() *gin.Engine {
+	db := NewDatabasePointer()
+
+	uc := controllers.NewAdminUsersController(db)
+
+	r := gin.Default()
+	r.GET("/v1/admin/users", func(c *gin.Context) {
+		uc.ShowAll(Request{c})
+	})
+	r.POST("/v1/admin/users", func(c *gin.Context) {
+		uc.Create(Request{c})
+	})
+
+	return r
+}
 
 type login struct {
 	Username string `json:"username" binding:"required"`

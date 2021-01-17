@@ -18,7 +18,7 @@ import (
 func TestMain(t *testing.T) {
 	os.Setenv("C_TOOL_ENVIRONMENT", "test")
 
-	router := setupRouter()
+	router := infrastructures.SetupRouter()
 
 	// テスト用に現在時刻を固定 2021-11-02 09:57:19
 	model.OverrapNowTime(2021, time.Month(11), 2, 19, 57, 19, 100)
@@ -90,14 +90,14 @@ func TestMain(t *testing.T) {
 					log.Fatal(err)
 				}
 
-				w := httptest.NewRecorder()
+				rec := httptest.NewRecorder()
 
 				// 実行
 				req, _ := http.NewRequest(http.MethodPost, "/v1/admin/users", b)
-				router.ServeHTTP(w, req)
+				router.ServeHTTP(rec, req)
 
 				// チェック
-				assert.Equal(t, c.ExpectedStatus, w.Code)
+				assert.Equal(t, c.ExpectedStatus, rec.Code)
 
 				// db := infrastructures.NewDatabasePointerInstance()
 				// db.BeginConnection()
@@ -123,13 +123,15 @@ func TestMain(t *testing.T) {
 
 	// 	j := strings.NewReader(`{"password":"admin","username":"admin"}`)
 
+	// 	rec := httptest.NewRecorder()
+
 	// 	// 実行
 	// 	req, _ := http.NewRequest(http.MethodPost, "/login", j)
-	// 	router.ServeHTTP(w, req)
+	// 	router.ServeHTTP(rec, req)
 
 	// 	// チェック
-	// 	assert.Equal(t, 200, w.Code)
-	// 	fmt.Println(w.Body.String())
+	// 	assert.Equal(t, 200, rec.Code)
+	// 	fmt.Println(rec.Body.String())
 
 	// })
 }

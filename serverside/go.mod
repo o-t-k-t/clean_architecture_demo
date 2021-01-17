@@ -21,7 +21,7 @@ require (
 	github.com/appleboy/gin-jwt v2.5.0+incompatible
 	github.com/appleboy/gin-jwt/v2 v2.6.4
 	github.com/gin-gonic/gin v1.6.3
-	github.com/lib/pq v1.8.0
+	github.com/lib/pq v1.9.0
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/sebdah/goldie/v2 v2.5.3

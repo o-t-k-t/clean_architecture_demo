@@ -6,6 +6,8 @@ import (
 
 	"github.com/TechDepa/c_tool/adapters/gateways"
 	"github.com/TechDepa/c_tool/domain/model"
+	_ "github.com/lib/pq"
+
 	"github.com/pkg/errors"
 	"gopkg.in/gorp.v1"
 )
