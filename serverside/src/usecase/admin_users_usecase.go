@@ -8,6 +8,8 @@ import (
 
 type AdminUsersRepository interface {
 	FindAll() (model.AdminUserList, error)
+	FindByEmail(email string) (model.AdminUser, error)
+
 	Create(u model.AdminUser) error
 }
 
@@ -49,7 +51,7 @@ func CreateUser(in CreateUserInput, r AdminUsersRepository) (Status, model.Admin
 	if err != nil {
 		return 400, au, errors.WithStack(err)
 	}
-	au.PasswordHash = hash
+	au.Hash = hash
 
 	err = r.Create(au)
 	if err != nil {

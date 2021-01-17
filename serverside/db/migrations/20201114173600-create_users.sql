@@ -4,7 +4,7 @@ create table if not exists base_users (
   "id" bigserial primary key,
   "created_at" timestamp not null,
   "updated_at" timestamp not null,
-  "email" varchar(255) not null,
+  "email" varchar(255) not null unique,
   "name" varchar(255) not null,
   "password_hash" varchar(1023) not null
 );

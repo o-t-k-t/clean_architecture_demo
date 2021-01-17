@@ -28,7 +28,8 @@ func (r AdminUsersRepository) FindAll() (model.AdminUserList, error) {
       admin_users.created_at,
       admin_users.updated_at,
       base_users.email,
-      base_users.name
+      base_users.name,
+      base_users.password_hash
 	from admin_users
 	join base_users on admin_users.base_user_id = base_users.id
 	order by admin_users.id
@@ -43,8 +44,32 @@ func (r AdminUsersRepository) FindAll() (model.AdminUserList, error) {
 	return model.AdminUserList(users), nil
 }
 
+func (r AdminUsersRepository) FindByEmail(email string) (model.AdminUser, error) {
+	q := `
+	select
+	admin_users.id,
+	admin_users.created_at,
+	admin_users.updated_at,
+	base_users.email,
+	base_users.name,
+	base_users.password_hash
+	from admin_users
+	join base_users on admin_users.base_user_id = base_users.id
+	where base_users.email = $1
+	order by admin_users.id
+	`
+
+	user := model.AdminUser{}
+	if err := r.db.SelectOne(&user, q, email); err != nil {
+		return user, errors.WithMessagef(err, "admin_users取得失敗")
+	}
+
+	return user, nil
+}
+
 func (r AdminUsersRepository) Create(au model.AdminUser) error {
 	bu := au.BaseUser
+
 	if err := r.db.Insert(&bu); err != nil {
 		return errors.WithMessagef(err, "base_users登録失敗")
 	}

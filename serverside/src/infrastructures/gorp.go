@@ -30,7 +30,7 @@ type Transaction struct {
 }
 
 // BeginConnection
-func (db Database) BeginConnection() {
+func (db *Database) BeginConnection() {
 	db.dbMap = NewDbMap()
 }
 
@@ -50,6 +50,12 @@ func (db *Database) BeginConnectionAndTransaction() error {
 // Select
 func (db Database) Select(i interface{}, query string, args ...interface{}) ([]interface{}, error) {
 	return db.dbMap.Select(i, query, args...)
+}
+
+// SelectOne
+
+func (db Database) SelectOne(holder interface{}, query string, args ...interface{}) error {
+	return db.dbMap.SelectOne(holder, query, args...)
 }
 
 // Insert

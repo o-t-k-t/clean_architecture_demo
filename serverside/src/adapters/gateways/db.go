@@ -8,6 +8,7 @@ type Database interface {
 	CommitOrRollbackAndClose(commit bool)
 	Close()
 	Select(i interface{}, query string, args ...interface{}) ([]interface{}, error)
+	SelectOne(holder interface{}, query string, args ...interface{}) error
 	Insert(list ...interface{}) error
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/TechDepa/c_tool/adapters/controllers"
 	"github.com/TechDepa/c_tool/domain/model"
+	"github.com/TechDepa/c_tool/usecase"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ func SetupRouter() *gin.Engine {
 
 	r := gin.Default()
 
-	authMiddleware := newAuthMiddleware()
+	authMiddleware := newAuthMiddleware(db)
 
 	if err := authMiddleware.MiddlewareInit(); err != nil {
 		log.Fatal("authMiddleware.MiddlewareInit() Error:" + err.Error())
@@ -60,7 +61,9 @@ type User struct {
 	LastName  string
 }
 
-func newAuthMiddleware() *jwt.GinJWTMiddleware {
+func newAuthMiddleware(db *Database) *jwt.GinJWTMiddleware {
+	ac := controllers.NewAuthController(db)
+
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
@@ -83,31 +86,17 @@ func newAuthMiddleware() *jwt.GinJWTMiddleware {
 			}
 		},
 		Authenticator: func(c *gin.Context) (interface{}, error) {
-			var loginVals login
-
-			if err := json.NewDecoder(c.Request.Body).Decode(&loginVals); err != nil {
+			var in usecase.AuthenticatorInput
+			if err := json.NewDecoder(c.Request.Body).Decode(&in); err != nil {
 				log.Fatal(err)
 			}
 
-			// 2021/1/11現在デシリアライズに失敗する模様
-			// if err := c.ShouldBindBodyWith(&loginVals, binding.JSON); err != nil {
-			// 	fmt.Println(err)
-			// 	fmt.Println(loginVals)
-			// 	return "", jwt.ErrMissingLoginValues
-			// }
-
-			userID := loginVals.Username
-			password := loginVals.Password
-
-			if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-				return &User{
-					UserName:  userID,
-					LastName:  "Bo-Yi",
-					FirstName: "Wu",
-				}, nil
+			user, err := ac.Authenticator(in, db)
+			if err != nil {
+				return nil, jwt.ErrFailedAuthentication
 			}
 
-			return nil, jwt.ErrFailedAuthentication
+			return &user, nil
 		},
 		Authorizator: func(data interface{}, c *gin.Context) bool {
 			if v, ok := data.(*User); ok && v.UserName == "admin" {

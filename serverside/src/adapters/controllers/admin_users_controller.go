@@ -6,12 +6,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type database interface {
-	BeginConnection()
-	BeginConnectionAndTransaction() error
-	Close(commit bool) error
-}
-
 type AdminUsersController struct {
 	db gateways.Database
 }

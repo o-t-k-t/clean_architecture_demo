@@ -7,16 +7,16 @@ import (
 
 type Password string
 
-func (v Password) NewPasswordHash() (PasswordHash, error) {
+func (v Password) NewPasswordHash() (string, error) {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(v), 10)
 	if err != nil {
 		return "", errors.WithMessagef(err, "パスワードハッシュ生成失敗")
 	}
 
-	return PasswordHash(hashed), nil
+	return string(hashed), nil
 }
 
-func (v Password) MatchesPasswordHash(hash PasswordHash) error {
+func (v Password) MatchesHash(hash string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(v))
 	if err != nil {
 		return errors.WithMessagef(err, "パスワードハッシュ生成失敗")
@@ -25,13 +25,11 @@ func (v Password) MatchesPasswordHash(hash PasswordHash) error {
 	return nil
 }
 
-type PasswordHash string
-
 type BaseUser struct {
 	Base
-	Email        string       `db:"email" json:"email"`
-	Name         string       `db:"name" json:"name"`
-	PasswordHash PasswordHash `db:"password_hash" json:"-"`
+	Email string `db:"email" json:"email"`
+	Name  string `db:"name" json:"name"`
+	Hash  string `db:"password_hash" json:"-"`
 }
 
 type AdminUser struct {

@@ -13,8 +13,10 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/TechDepa/c_tool/adapters/gateways"
 	"github.com/TechDepa/c_tool/domain/model"
 	"github.com/TechDepa/c_tool/infrastructures"
+	"github.com/TechDepa/c_tool/usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -69,7 +71,7 @@ func TestMain(t *testing.T) {
 			ExpectedStatus  int
 			ExpectedUsers   int
 		}{
-			{"正常ケースで200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a4", "a1a2a3a4", 200, 1},
+			// {"正常ケースで200応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a4", "a1a2a3a4", 200, 1},
 			// {"パスワード不一致で400応答", "jima@hotmail.com", "廣川 舞", "a1a2a3a4", "a1a2a3a4a5", 400, 0},
 			// {"パスワード長0文字で400応答", "jima@hotmail.com", "廣川 舞", "", "", 400, 0},
 			// {"パスワード長5文字で400応答", "jima@hotmail.com", "廣川 舞", "a1a2a", "a1a2a", 400, 0},
@@ -122,6 +124,25 @@ func TestMain(t *testing.T) {
 	t.Run("POST /login", func(t *testing.T) {
 		t.Cleanup(func() { truncateTables("base_users", "admin_users") })
 
+		db := infrastructures.NewDatabasePointer()
+		db.BeginConnection()
+
+		usecase.CreateUser(
+			usecase.CreateUserInput{
+				AdminUser: model.AdminUser{
+					BaseUser: model.BaseUser{
+						Email: "watanabesotaro@watanabe.com",
+						Name:  "井上亮介",
+					},
+				},
+				Password:        "a1a2a3a4",
+				PasswordConfirm: "a1a2a3a4",
+			},
+			gateways.NewAdminUsersRepository(db),
+		)
+
+		db.Close()
+
 		// 前提条件
 		b, err := os.Open("testdata/post_login.json.template")
 		if err != nil {
@@ -129,15 +150,16 @@ func TestMain(t *testing.T) {
 		}
 		defer b.Close()
 
-		j := strings.NewReader(`{"password":"admin","username":"admin"}`)
+		// j := strings.NewReader(`{"password":"admin","username":"admin"}`)
 
 		// 実行
 		rec := httptest.NewRecorder()
-		req, _ := http.NewRequest(http.MethodPost, "/v1/login", j)
+		req, _ := http.NewRequest(http.MethodPost, "/v1/login", b)
 		router.ServeHTTP(rec, req)
 
 		// チェック
 		assert.Equal(t, 200, rec.Code)
+		fmt.Println(rec.Body.String())
 	})
 }
 
@@ -163,8 +185,6 @@ func login(router *gin.Engine) string {
 	if err := json.NewDecoder(rec.Body).Decode(&res); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(rec.Body.String())
-	fmt.Println(res.Token)
 
 	return res.Token
 }
