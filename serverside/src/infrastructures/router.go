@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TechDepa/c_tool/adapters/controllers"
+	"github.com/TechDepa/c_tool/domain/model"
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 )
@@ -16,10 +17,29 @@ func SetupRouter() *gin.Engine {
 	uc := controllers.NewAdminUsersController(db)
 
 	r := gin.Default()
-	r.GET("/v1/admin/users", func(c *gin.Context) {
+
+	authMiddleware := newAuthMiddleware()
+
+	if err := authMiddleware.MiddlewareInit(); err != nil {
+		log.Fatal("authMiddleware.MiddlewareInit() Error:" + err.Error())
+	}
+
+	r.POST("/v1/login", authMiddleware.LoginHandler)
+
+	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
+		claims := jwt.ExtractClaims(c)
+		log.Printf("NoRoute claims: %#v\n", claims)
+		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
+	})
+
+	auth := r.Group("/v1/auth")
+	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	auth.Use(authMiddleware.MiddlewareFunc())
+
+	auth.GET("/admin/users", func(c *gin.Context) {
 		uc.ShowAll(Request{c})
 	})
-	r.POST("/v1/admin/users", func(c *gin.Context) {
+	auth.POST("/admin/users", func(c *gin.Context) {
 		uc.Create(Request{c})
 	})
 
@@ -40,7 +60,7 @@ type User struct {
 	LastName  string
 }
 
-func AuthMiddleware() *jwt.GinJWTMiddleware {
+func newAuthMiddleware() *jwt.GinJWTMiddleware {
 	// the jwt middleware
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:       "test zone",
@@ -118,7 +138,7 @@ func AuthMiddleware() *jwt.GinJWTMiddleware {
 		TokenHeadName: "Bearer",
 
 		// TimeFunc provides the current time. You can override it to use another time value. This is useful for testing or if your server uses a different time zone than your tokens.
-		TimeFunc: time.Now,
+		TimeFunc: model.NowTime,
 	})
 
 	if err != nil {
